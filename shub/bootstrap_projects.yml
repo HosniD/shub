@@ -1,0 +1,11 @@
+casperjs:
+  directory: examples/javascript/casperjs
+  description: Download arbitrary URLs and parse links using CasperJS. The description is really long, we should probably shorten it. Good thing we have output wrapping when listing projects.
+
+go:
+  directory: examples/go/jsontest.com
+  description: Download and parse test data from jsontest.com using Go
+
+anemone:
+  directory: examples/ruby/anemone
+  description: Download blog articles using the Anemone Ruby gem

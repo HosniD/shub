@@ -67,6 +67,20 @@ def get_available_projects():
     return yaml.safe_load(resp.text)
 
 
+# XXX: BEGIN Remove this, used for local debugging
+def _get_available_projects():
+    import os.path
+    projects_path = os.path.join(
+        os.path.dirname(__file__), 'bootstrap_projects.yml')
+    with open(projects_path, 'r') as f:
+        return yaml.safe_load(f)
+
+
+if not os.getenv('USING_TOX'):
+    get_available_projects = _get_available_projects  # noqa
+# XXX: END Remove this
+
+
 def list_projects(projects):
     formatter = HelpFormatter()
     with formatter.section("Available projects"):
