@@ -131,7 +131,7 @@ def _extract_metadata_from_image_info_output(output):
         elif not all(name and isinstance(name, string_types)
                      for name in spiders_data.keys()):
             raise ShubException('shub-image-info: spiders section should '
-                               'contain non-empty string spider names')
+                                'contain non-empty string spider names')
         spiders, scripts = [], []
         for name in spiders_data:
             spiders.append(name) if name.startswith('py:') else scripts.append(name)
