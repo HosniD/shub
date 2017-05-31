@@ -53,10 +53,11 @@ def list_cmd_full(target, silent, version):
     version = version or config.get_version()
     image_name = utils.format_image_name(image, version)
     target_conf = config.get_target_conf(target)
-    for spider in list_cmd(image_name,
-                           target_conf.project_id,
-                           target_conf.endpoint,
-                           target_conf.apikey):
+    metadata = list_cmd(image_name,
+                        target_conf.project_id,
+                        target_conf.endpoint,
+                        target_conf.apikey)
+    for spider in metadata.get('spiders', []):
         click.echo(spider)
 
 
@@ -123,14 +124,14 @@ def _extract_metadata_from_image_info_output(output):
 
     def raise_shub_image_info_error(error):
         """Helper to raise ShubException with prefix and output"""
-        msg = "shub-image-info: {} \n[output '{}'".format(error, output)
+        msg = "shub-image-info: {} \n[output '{}']".format(error, output)
         raise ShubException(msg)
 
     try:
         metadata = json.loads(output)
-    except ValueError:
-        raise_shub_image_info_error('output is not a valid JSON')
-    spiders_list = metadata.get('spiders', [])
+        spiders_list = metadata.get('spiders', [])
+    except (ValueError, AttributeError):
+        raise_shub_image_info_error('output is not a valid JSON dict')
     if not isinstance(spiders_list, list):
         raise_shub_image_info_error('spiders section must be a list')
 
