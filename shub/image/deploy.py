@@ -218,7 +218,7 @@ def _prepare_deploy_params(project, version, image_name, endpoint, apikey,
 def _extract_scripts_from_project(setup_filename='setup.py'):
     """Parse setup.py and return scripts"""
     if not os.path.isfile(setup_filename):
-        return ''
+        return []
     mock_setup = textwrap.dedent('''\
     def setup(*args, **kwargs):
         __setup_calls__.append((args, kwargs))
