@@ -119,20 +119,24 @@ def _run_cmd_in_docker_container(image_name, command, environment):
 
 
 def _extract_metadata_from_image_info_output(output):
-        try:
-            metadata = json.loads(output)
-        except ValueError:
-            raise ShubException('shub-image-info: output is not a valid JSON: {}'
-                                .format(output))
-        spiders_data = metadata.get('spiders', {})
-        if not isinstance(spiders_data, dict):
-            raise ShubException('shub-image-info: spiders section must be '
-                                'a dictionary, got {}'.format(spiders_data))
-        elif not all(name and isinstance(name, string_types)
-                     for name in spiders_data.keys()):
-            raise ShubException('shub-image-info: spiders section should '
-                                'contain non-empty string spider names')
-        spiders, scripts = [], []
-        for name in spiders_data:
-            spiders.append(name) if name.startswith('py:') else scripts.append(name)
-        return {'spiders': spiders, 'scripts': scripts}
+    """Extract and validate spiders list from `shub-image-info` output."""
+
+    def raise_shub_image_info_error(error):
+        """Helper to raise ShubException with prefix and output"""
+        msg = "shub-image-info: {} \n[output '{}'".format(error, output)
+        raise ShubException(msg)
+
+    try:
+        metadata = json.loads(output)
+    except ValueError:
+        raise_shub_image_info_error('output is not a valid JSON')
+    spiders_list = metadata.get('spiders', [])
+    if not isinstance(spiders_list, list):
+        raise_shub_image_info_error('spiders section must be a list')
+
+    spiders, scripts = [], []
+    for name in spiders_list:
+        if not (name and isinstance(name, string_types)):
+            raise_shub_image_info_error("spider name can't be empty or non-string")
+        scripts.append(name[3:]) if name.startswith('py:') else spiders.append(name)
+    return {'spiders': spiders, 'scripts': scripts}
