@@ -3,7 +3,7 @@ from click.testing import CliRunner
 from unittest import TestCase
 
 from shub.image.list import cli
-from shub.image.list import _run_list_cmd
+from shub.image.list import _run_cmd_in_docker_container
 
 from .utils import FakeProjectDirectory
 from .utils import add_sh_fake_config
@@ -65,17 +65,18 @@ class TestListCli(TestCase):
 class TestListCmd(TestCase):
 
     @mock.patch('shub.image.utils.get_docker_client')
-    def test_run_list_cmd(self, get_client_mock):
+    def test_run_cmd_in_docker_container(self, get_client_mock):
         client_mock = mock.Mock()
         client_mock.create_container.return_value = {'Id': '1234'}
         client_mock.wait.return_value = 0
         client_mock.logs.return_value = 'abc\ndef\ndsd'
         get_client_mock.return_value = client_mock
-        assert _run_list_cmd(1234, 'image', {})[0] == 0
+        test_env = {'TEST_ENV1': 'VAL1', 'TEST_ENV2': 'VAL2'}
+        result = _run_cmd_in_docker_container('image', 'test-cmd', test_env)
+        assert result[0] == 0
+        assert result[1] == 'abc\ndef\ndsd'
         client_mock.create_container.assert_called_with(
-            command=['list-spiders'], environment={
-                'JOB_SETTINGS': '{}',
-                'SCRAPY_PROJECT_ID': '1234'}, image='image')
+            command=['test-cmd'], environment=test_env, image='image')
         client_mock.start.assert_called_with({'Id': '1234'})
         client_mock.wait.assert_called_with(container="1234")
         client_mock.logs.assert_called_with(
